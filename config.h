@@ -7,6 +7,7 @@ extern volatile unsigned int run;
 
 void oscSetup(void);
 void ms_delay(int n);
+void us_delay(int n);
 void T5Setup(void);
 void T2Setup(void);
 void T4Setup(void);

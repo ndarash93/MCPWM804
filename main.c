@@ -84,8 +84,12 @@
 
 
 int main(void) {       
-    
+    float Vdref, Vqref;
+    const int Lq, Ld, Idref, Iqref, deltaT, kN;
       
+    
+    
+    
     //unsigned int a = 0, b = 0, c = 0;
     //int d, q;
     //char str[30];
@@ -103,13 +107,13 @@ int main(void) {
     uartSetup();
     
     //UARTSend("Test");
-    dmaSetup();
-    adcSetup();
+    //dmaSetup();
+    //adcSetup();
     T2Setup();
     T4Setup();
-    inputCaptureSetup();
+    //inputCaptureSetup();
     
-    i2cSetup();
+    //i2cSetup();
     
     
     hall_A = PORTCbits.RC0;
@@ -117,69 +121,9 @@ int main(void) {
     hall_C = PORTCbits.RC2;
     
     //float d, q, alpha, beta;
-    TRISCbits.TRISC9 = 0;
-    LATCbits.LATC9 = 1;
-
-    I2C1CONbits.SEN = 1;
-    us_delay(100);
-    i2cSend(SLAVE_ADDRESS);
-    us_delay(100);
-    i2cSend(0x80);
-    us_delay(100);
-    i2cSend(0x8D);
-    us_delay(100);
-    i2cSend(0x80);
-    us_delay(100);
-    i2cSend(0x14);
-    us_delay(100);
-    i2cSend(0x80);
-    us_delay(100);
-    i2cSend(0xAF);
-    us_delay(100);
-    I2C1CONbits.PEN = 1;
-    ms_delay(100);
-    
-    unsigned int i, j, page;
-    i = 0;
-    j = 0;
-    while(i < 8){
-        while(j < 128){
-            oled[i][j] = 0xff;
-            j++;
-        }
-        i++;
-    }
+    T1Setup();
     while(1){
-        i = 0;
-        j = 0;
-        page = 0xB0;
-        while(page < 0xB8){
-            I2C1CONbits.SEN = 1;
-            us_delay(100);
-            i2cSend(SLAVE_ADDRESS);
-            us_delay(100);
-            i2cSend(0b10000000);
-            us_delay(100);
-            i2cSend(page);
-            us_delay(100);
-            I2C1CONbits.PEN = 1;
-            us_delay(100);
-            I2C1CONbits.SEN = 1;
-            us_delay(100);
-            i2cSend(SLAVE_ADDRESS);
-            us_delay(100);
-            i2cSend(0b01000000);
-            us_delay(100);
-            while(j < 128){
-                i2cSend(oled[i][j]);
-                us_delay(100);
-                j++;
-            }
-            I2C1CONbits.PEN = 1;
-            us_delay(100);
-            page++;
-            i++;
-        }
+        
     }
     return 0;
 }

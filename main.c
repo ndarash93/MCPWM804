@@ -66,10 +66,6 @@
 #include "uart.h"
 #include "lookup.h"
 #include "inputCapture.h"
-<<<<<<< HEAD
-=======
-#include "i2c.h"
->>>>>>> master
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -112,11 +108,7 @@ int main(void) {
     T4Setup();
     inputCaptureSetup();
     
-<<<<<<< HEAD
-=======
     i2cSetup();
-    
->>>>>>> master
     
     hall_A = PORTCbits.RC0;
     hall_B = PORTCbits.RC1;
@@ -125,73 +117,10 @@ int main(void) {
     //float d, q, alpha, beta;
     TRISCbits.TRISC9 = 0;
     LATCbits.LATC9 = 1;
-<<<<<<< HEAD
     
     while(1){
+         
         
-=======
-
-    I2C1CONbits.SEN = 1;
-    us_delay(100);
-    i2cSend(SLAVE_ADDRESS);
-    us_delay(100);
-    i2cSend(0x80);
-    us_delay(100);
-    i2cSend(0x8D);
-    us_delay(100);
-    i2cSend(0x80);
-    us_delay(100);
-    i2cSend(0x14);
-    us_delay(100);
-    i2cSend(0x80);
-    us_delay(100);
-    i2cSend(0xAF);
-    us_delay(100);
-    I2C1CONbits.PEN = 1;
-    ms_delay(100);
-    
-    unsigned int i, j, page;
-    i = 0;
-    j = 0;
-    while(i < 8){
-        while(j < 128){
-            oled[i][j] = 0xff;
-            j++;
-        }
-        i++;
-    }
-    while(1){
-        i = 0;
-        j = 0;
-        page = 0xB0;
-        while(page < 0xB8){
-            I2C1CONbits.SEN = 1;
-            us_delay(100);
-            i2cSend(SLAVE_ADDRESS);
-            us_delay(100);
-            i2cSend(0b10000000);
-            us_delay(100);
-            i2cSend(page);
-            us_delay(100);
-            I2C1CONbits.PEN = 1;
-            us_delay(100);
-            I2C1CONbits.SEN = 1;
-            us_delay(100);
-            i2cSend(SLAVE_ADDRESS);
-            us_delay(100);
-            i2cSend(0b01000000);
-            us_delay(100);
-            while(j < 128){
-                i2cSend(oled[i][j]);
-                us_delay(100);
-                j++;
-            }
-            I2C1CONbits.PEN = 1;
-            us_delay(100);
-            page++;
-            i++;
-        }
->>>>>>> master
     }
     return 0;
 }

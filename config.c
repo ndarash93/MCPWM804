@@ -75,6 +75,3 @@ void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
 }
 <<<<<<< HEAD
 */
-=======
-*/
->>>>>>> master

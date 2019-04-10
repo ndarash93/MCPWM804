@@ -3,4 +3,8 @@ debug/
 dist/
 nbproject/Makefile-*
 nbproject/Package-*
+<<<<<<< HEAD
 nbproject/private/
+=======
+nbproject/private/
+>>>>>>> master

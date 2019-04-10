@@ -1,7 +1,7 @@
 #include "xc.h"
 
 
-volatile unsigned int run = 0;
+volatile unsigned int run = 0, okToSwitch;
 
 void oscSetup(void){   
     CLKDIVbits.PLLPRE = 0; //N1 = 2
@@ -61,17 +61,17 @@ void T4Setup(void){
 
 void T1Setup(void){
     IFS0bits.T1IF = 0;
-    IEC0bits.T1IE = 0;
+    IEC0bits.T1IE = 1;
     T4CONbits.TCKPS = 0b00;
     PR1 = 400;
-    T4CONbits.TON;
+    T4CONbits.TON = 1;
 }
 
-/*
+
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
     IFS0bits.T1IF = 0;
+    //T1CONbits.TON = 0;
+    //okToSwitch = 1;
     run++;
-    
 }
-<<<<<<< HEAD
-*/
+

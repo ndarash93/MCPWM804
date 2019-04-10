@@ -3,7 +3,7 @@
 
 
 #include <xc.h>
-extern volatile unsigned int run;
+extern volatile unsigned int run, okToSwitch;
 
 void oscSetup(void);
 void ms_delay(int n);

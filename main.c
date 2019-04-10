@@ -83,8 +83,8 @@
 
 
 int main(void) {       
+    //unsigned int old_hall_A = 0, old_hall_B = 0, old_hall_C = 0;
     
-      
     //unsigned int a = 0, b = 0, c = 0;
     //int d, q;
     //char str[30];
@@ -97,29 +97,42 @@ int main(void) {
     TRISCbits.TRISC0 = 1;
     TRISCbits.TRISC1 = 1;
     TRISCbits.TRISC2 = 1;
-    LATCbits.LATC4 = 0;
+    LATCbits.LATC4 = 1;
     
     uartSetup();
     
     //UARTSend("Test");
     dmaSetup();
     adcSetup();
-    T2Setup();
+    T1Setup();
     T4Setup();
     inputCaptureSetup();
-    
-    i2cSetup();
     
     hall_A = PORTCbits.RC0;
     hall_B = PORTCbits.RC1;
     hall_C = PORTCbits.RC2;
     
     //float d, q, alpha, beta;
-    TRISCbits.TRISC9 = 0;
-    LATCbits.LATC9 = 1;
-    
     while(1){
-         
+        if(run < 9){
+            H1 = hall_A;
+            L1 = !hall_A;
+            H2 = hall_B;
+            L2 = !hall_B;
+            H3 = hall_C;
+            L3 = !hall_C;
+            //okToSwitch = 0;
+        }else{
+            H1 = 0;
+            L1 = 0;
+            H2 = 0;
+            L2 = 0;
+            H3 = 0;
+            L3 = 0;
+            if(run >= 10){
+                run = 0;
+            }
+        }
         
     }
     return 0;

@@ -3,7 +3,7 @@
 
 
 #include <xc.h>
-extern volatile unsigned int wm;
+extern volatile unsigned int wm, update;
 
 void oscSetup(void);
 void ms_delay(int n);

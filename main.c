@@ -71,20 +71,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define H1 P1OVDCONbits.POUT1H
-#define L1 P1OVDCONbits.POUT1L
-#define H2 P1OVDCONbits.POUT2H
-#define L2 P1OVDCONbits.POUT2L
-#define H3 P1OVDCONbits.POUT3H
-#define L3 P1OVDCONbits.POUT3L
 
-
-
+void inverse_parke(int d, int q, int theta, float* alpha, float* beta);
+void inverse_clark(float alpha, float beta, float* a, float* b, float* c);
 
 
 
 int main(void) {       
-    float Vdref, Vqref;
+    float Vdref, Vqref, Valpha, Vbeta, va, vb, vc;
     const int Lq, Ld, Idref, Iqref, deltaT, kN;
       
     
@@ -123,7 +117,27 @@ int main(void) {
     //float d, q, alpha, beta;
     T1Setup();
     while(1){
-        
+        if(update){
+            update = 0;
+            inverse_parke(Vdref, Vqref, wm, &Valpha, &Vbeta);
+            inverse_clark(Valpha, Vbeta, &va, &vb, &vc);
+            PDC1 = (va+18)*1000;
+            PDC2 = (vb+18)*1000;
+            PDC3 = (vc+18)*1000;
+        }
+
     }
     return 0;
+}
+
+
+void inverse_parke(int d, int q, int theta, float* alpha, float* beta){
+    *alpha = d*cos[theta] - q*sin[theta];
+    *beta = q*cos[theta] + d*sin[theta];
+}
+
+void inverse_clark(float alpha, float beta, float* a, float* b, float* c){
+    *a = alpha;
+    *b = (1/2)*((-alpha) + (1.7321*beta));
+    *c = (1/2)*((-alpha) - (1.7321*beta));
 }

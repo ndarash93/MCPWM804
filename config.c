@@ -1,7 +1,7 @@
 #include "xc.h"
 
 
-volatile unsigned int wm = 0;;
+volatile unsigned int wm = 0, update = 0;
 
 void oscSetup(void){   
     CLKDIVbits.PLLPRE = 0; //N1 = 2
@@ -71,6 +71,7 @@ void T1Setup(void){
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
     IFS0bits.T1IF = 0;
     wm++;
+    update = 1;
     if(wm >= 360){
         wm = 0;
     }

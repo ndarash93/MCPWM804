@@ -1,6 +1,8 @@
 build/
 debug/
 dist/
-nbproject/
+nbproject/Makefile-*
+nbproject/Package-*
+nbproject/private/
 
-Makefile
+

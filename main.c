@@ -125,7 +125,6 @@ int main(void) {
             PDC2 = (vb+18)*1000;
             PDC3 = (vc+18)*1000;
         }
-
     }
     return 0;
 }

@@ -43,6 +43,7 @@ void adcSetup(void){
 
     
     AD1PCFGL = 0xfff0;
+    //AD1PCFGH = 0xffff;
     
     AD1CON1bits.ADON = 1;
 }

@@ -1,7 +1,7 @@
 #include "xc.h"
 
 
-volatile unsigned int wm = 0, update = 0;
+volatile unsigned int theta = 0, update = 0;
 
 void oscSetup(void){   
     CLKDIVbits.PLLPRE = 0; //N1 = 2
@@ -53,8 +53,8 @@ void T2Setup(void){
 
 void T4Setup(void){
     IFS1bits.T4IF = 0;
-    IEC1bits.T4IE = 0;
-    PR4 = 4000;
+    IEC1bits.T4IE = 1;
+    PR4 = 32000;
     T4CONbits.TCKPS = 0b00;
     T4CONbits.TON = 1;
 }
@@ -62,17 +62,17 @@ void T4Setup(void){
 void T1Setup(void){
     IFS0bits.T1IF = 0;
     IEC0bits.T1IE = 1;
-    T4CONbits.TCKPS = 0b11;
+    T1CONbits.TCKPS = 0b11;
     PR1 = 36;
-    T4CONbits.TON;
+    T1CONbits.TON = 1;
 }
 
 
 void __attribute__((interrupt, no_auto_psv)) _T1Interrupt(void){
     IFS0bits.T1IF = 0;
-    wm++;
+    theta++;
     update = 1;
-    if(wm >= 360){
-        wm = 0;
+    if(theta >= 360){
+        theta = 0;
     }
 }

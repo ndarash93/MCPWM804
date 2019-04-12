@@ -43,7 +43,7 @@
 #pragma config ALTI2C = OFF             // Alternate I2C  pins (I2C mapped to SDA1/SCL1 pins)
 #pragma config LPOL = ON                // Motor Control PWM Low Side Polarity bit (PWM module low side output pins have active-high output polarity)
 #pragma config HPOL = ON                // Motor Control PWM High Side Polarity bit (PWM module high side output pins have active-high output polarity)
-#pragma config PWMPIN = ON              // Motor Control PWM Module Pin Mode bit (PWM module pins controlled by PORT register at device Reset)
+#pragma config PWMPIN = ON             // Motor Control PWM Module Pin Mode bit (PWM module pins controlled by PORT register at device Reset)
 
 // FICD
 #pragma config ICS = PGD1               // Comm Channel Select (Communicate on PGC1/EMUC1 and PGD1/EMUD1)
@@ -72,40 +72,38 @@
 #include <string.h>
 
 
-void inverse_parke(int d, int q, int theta, float* alpha, float* beta);
-void inverse_clark(float alpha, float beta, float* a, float* b, float* c);
-
+void inverse_park(int d, int q, int theta, float* alpha, float* beta);
+void inverse_clarke(float alpha, float beta, float* a, float* b, float* c);
+void park(float alpha, float beta, float* d, float* q, int theta);
+void clarke(float a, float b, float c, float* alpha, float* beta);
 
 
 int main(void) {       
-    float Vdref, Vqref, Valpha, Vbeta, va, vb, vc;
-    const int Lq, Ld, Idref, Iqref, deltaT, kN;
-      
+    float Vdref, Vqref, Valpha, Vbeta, va, vb, vc, ia_fake, ib_fake, ic_fake, Ialpha, Ibeta, Iqref, Idref, Id, Iq;
+    const int Lq, Ld, deltaT, kN;
+    Vdref = 0;
+    Vqref = 5;
+    Iqref = 1;
+    Idref = 0;
     
-    
-    
-    //unsigned int a = 0, b = 0, c = 0;
-    //int d, q;
-    //char str[30];
     oscSetup();
     
     pwmSetup();
-    T5Setup();
+    //T5Setup();
     
     TRISCbits.TRISC4 = 0;
     TRISCbits.TRISC0 = 1;
     TRISCbits.TRISC1 = 1;
     TRISCbits.TRISC2 = 1;
-    LATCbits.LATC4 = 0;
+    LATCbits.LATC4 = 1;
     
-    uartSetup();
+    //uartSetup();
     
     //UARTSend("Test");
-    //dmaSetup();
-    //adcSetup();
-    T2Setup();
-    T4Setup();
-    //inputCaptureSetup();
+    dmaSetup();
+    adcSetup();
+    
+    inputCaptureSetup();
     
     //i2cSetup();
     
@@ -114,29 +112,59 @@ int main(void) {
     hall_B = PORTCbits.RC1;
     hall_C = PORTCbits.RC2;
     
-    //float d, q, alpha, beta;
     T1Setup();
+    T2Setup();
+    T4Setup();
+    ia_fake = 1;
+    ib_fake = 1;
+    ic_fake = 1;
     while(1){
+        
         if(update){
+            clarke(ia_fake*sin[theta], ib_fake*sin_120[theta], ic_fake*sin_m120[theta], &Ialpha, &Ibeta);
+            park(Ialpha, Ibeta, &Id, &Iq, theta);
+            
+            PDC1 = (Id+1)*200;
+            PDC2 = (Iq+1)*200;
+            PDC3 = (Ialpha+1)*200;
+            
+            
+            
+            /*
+            PDC1 = 200;
             update = 0;
-            inverse_parke(Vdref, Vqref, wm, &Valpha, &Vbeta);
-            inverse_clark(Valpha, Vbeta, &va, &vb, &vc);
-            PDC1 = (va+18)*1000;
-            PDC2 = (vb+18)*1000;
-            PDC3 = (vc+18)*1000;
+            inverse_park(Vdref, Vqref, fTheta, &Valpha, &Vbeta);
+            inverse_clarke(Valpha, Vbeta, &va, &vb, &vc);
+            PDC1 = (unsigned int)((va+6)*150);
+            PDC2 = (unsigned int)((vb+6)*150);
+            PDC3 = (unsigned int)((vc+6)*150);
+            //PDC1 = (unsigned int)((fOmega));
+            */
         }
+        
     }
     return 0;
 }
 
 
-void inverse_parke(int d, int q, int theta, float* alpha, float* beta){
+void inverse_park(int d, int q, int theta, float* alpha, float* beta){
     *alpha = d*cos[theta] - q*sin[theta];
     *beta = q*cos[theta] + d*sin[theta];
 }
 
-void inverse_clark(float alpha, float beta, float* a, float* b, float* c){
+void inverse_clarke(float alpha, float beta, float* a, float* b, float* c){
     *a = alpha;
-    *b = (1/2)*((-alpha) + (1.7321*beta));
-    *c = (1/2)*((-alpha) - (1.7321*beta));
+    *b = (.5)*((-alpha) + (1.7321*beta));
+    *c = (.5)*((-alpha) - (1.7321*beta));
 }
+
+void park(float alpha, float beta, float* d, float* q, int theta){
+    *d = cos[theta]*alpha + sin[theta]*beta;
+    *q = cos[theta]*beta - sin[theta]*alpha;
+}
+
+void clarke(float a, float b, float c, float* alpha, float* beta){
+    *alpha = a;
+    *beta = (0.5773*(b-c));
+}
+

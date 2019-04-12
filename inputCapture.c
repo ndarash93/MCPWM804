@@ -11,7 +11,7 @@
 volatile unsigned int hall_A, hall_B, hall_C, timeStep;
 volatile int position, speed, calculatedPosition, distance, step, send;
 
-volatile float fPos, fSpeed, fCalc, fDistance;
+volatile float fPos, fSpeed, fCalc, fDistance, fTheta, fOmega;
 
 float alpha, beta, command_D = -1, command_Q = 1, i_D, i_Q;
 float error_D, error_Q, integral_D, integral_Q, u_D, u_Q, i_A, i_B, i_C;
@@ -55,9 +55,11 @@ void __attribute__((interrupt, no_auto_psv)) _IC1Interrupt(void){
     IFS0bits.IC1IF = 0;
     TMR2 = 0;
     hall_A = !hall_A;
+    //send = 1;
     if(hall_A && hall_B && !hall_C){
         //position++;
-        fSpeed = 1.0472/(IC1BUF*0.0000064);
+        //fSpeed = 1.0472/(IC1BUF*0.0000064);
+        fOmega = 60/(IC1BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 1;
         P1OVDCONbits.POUT1L = 0;
@@ -71,7 +73,8 @@ void __attribute__((interrupt, no_auto_psv)) _IC1Interrupt(void){
         
     }else if(!hall_A && !hall_B && hall_C){
         //position++;
-        fSpeed = 1.0472/(IC1BUF*0.0000064);
+        //fSpeed = 1.0472/(IC1BUF*0.0000064);
+        fOmega = 60/(IC1BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 0;
         P1OVDCONbits.POUT1L = 1;
@@ -90,14 +93,17 @@ void __attribute__((interrupt, no_auto_psv)) _IC2Interrupt(void){
     IFS0bits.IC2IF = 0;
     TMR2 = 0;
     hall_B = !hall_B;
+    //send = 1;
     if(hall_A && hall_B && !hall_C){
         //position--;
        
     }else if(hall_A && !hall_B && !hall_C){
         //position++;
-        fSpeed = 1.0472/(IC2BUF*0.0000064);
-        fPos = 0;
-        fCalc = 0;
+        //fSpeed = 1.0472/(IC2BUF*0.0000064);
+        //fPos = 0;
+        //fCalc = 0;
+        fTheta = 0;
+        fOmega = 60/(IC2BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 1;
         P1OVDCONbits.POUT1L = 0;
@@ -111,7 +117,8 @@ void __attribute__((interrupt, no_auto_psv)) _IC2Interrupt(void){
         
     }else if(!hall_A && hall_B && hall_C){
         //position++;
-        fSpeed = 1.0472/(IC2BUF*0.0000064);
+        //fSpeed = 1.0472/(IC2BUF*0.0000064);
+        fOmega = 60/(IC2BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 0;
         P1OVDCONbits.POUT1L = 1;
@@ -127,13 +134,17 @@ void __attribute__((interrupt, no_auto_psv)) _IC7Interrupt(void){
     IFS1bits.IC7IF = 0;
     TMR2 = 0;
     hall_C = !hall_C;
+    //send = 1;
     if(hall_A && !hall_B && !hall_C){
         //position--;
-        fPos = 0;
-        fCalc = 0;
+        //fPos = 0;
+        //fCalc = 0;
+        fTheta = 0;
     }else if(hall_A && !hall_B && hall_C){
         //position++;
-        fSpeed = 1.0472/(IC7BUF*0.0000064);
+        //fSpeed = 1.0472/(IC7BUF*0.0000064);
+        fOmega = 60/(IC7BUF*0.0000064);
+        
         /*
         P1OVDCONbits.POUT1H = 1;
         P1OVDCONbits.POUT1L = 0;
@@ -147,7 +158,8 @@ void __attribute__((interrupt, no_auto_psv)) _IC7Interrupt(void){
         
     }else if(!hall_A && hall_B && !hall_C){
         //position++;
-        fSpeed = 1.0472/(IC7BUF*0.0000064);
+        //fSpeed = 1.0472/(IC7BUF*0.0000064);
+        fOmega = 60/(IC7BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 0;
         P1OVDCONbits.POUT1L = 1;
@@ -162,17 +174,22 @@ void __attribute__((interrupt, no_auto_psv)) _IC7Interrupt(void){
 
 void __attribute__ ((interrupt, no_auto_psv)) _T2Interrupt(void){
     IFS0bits.T2IF = 0;
-    fSpeed = 0;
-    i_A = 0;
-    i_B = 0;
-    i_C = 0; 
+    send = 1;
+    //fSpeed = 0;
+    fOmega = 0;
+    //i_A = 0;
+    //i_B = 0;
+    //i_C = 0; 
 }
 
 void __attribute__ ((interrupt, no_auto_psv)) _T4Interrupt(void){
     IFS1bits.T4IF = 0;
     
     // calculated speed
-    fCalc += fSpeed*.0001;
-    step = 1;
-    send++;
+    //fCalc += fSpeed*.0008;
+    
+    fTheta += fOmega*.0008;
+    //if(fTheta>=360.0){
+        //fTheta = 359;
+    //}
 }

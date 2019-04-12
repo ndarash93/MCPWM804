@@ -73,10 +73,10 @@
 
 
 
-#define IA bufferADC[0]
+#define IC bufferADC[0]
 #define IB bufferADC[1]
-#define IC bufferADC[2]
-
+#define IA bufferADC[2]
+#define EN LATCbits.LATC4
 
 
 void inverse_park(int d, int q, int theta, float* alpha, float* beta);
@@ -86,16 +86,15 @@ void clarke(float a, float b, float c, float* alpha, float* beta);
 float PI(float request, float actual, unsigned int Kp, unsigned int Ki, float* integral);
 
 int main(void) {       
-    float Vdref, Vqref, Valpha, Vbeta, va, vb, vc, ia_fake, ib_fake, ic_fake, Ialpha, Ibeta, Iqref, Idref, Id, Iq;
+    float Vd_command, Vq_command, Valpha, Vbeta, Va, Vb, Vc, Ia, Ib, Ic, Ialpha, Ibeta, Iqref, Idref, Id, Iq;
     const int Lq, Ld, deltaT, kN;
-    float Id_err, Iq_err;
+    float Id_err = 0, Iq_err = 0, Id_req, Iq_req, Id_integral = 0, Iq_integral = 0, Id_command, Iq_command;
+    unsigned int Kp = 200, Ki = 100;
+    
+    Id_req = 0.0;
+    Iq_req = 3.0;
     
     
-    
-    Vdref = 0;
-    Vqref = 5;
-    Iqref = 1;
-    Idref = 0;
     
     oscSetup();
     
@@ -126,34 +125,43 @@ int main(void) {
     T1Setup();
     T2Setup();
     T4Setup();
-    ia_fake = 10;
-    ib_fake = 10;
-    ic_fake = 10;
+    
     while(1){
         
-        if(update){
+        if(update && fOmega > 2000){
+            EN = 1;
+            update = 0;
+            
+            Ia = current[IA];
+            Ib = current[IB];
+            Ic = current[IC];
             
             
             
-            
-            
-            //clarke(ia_fake*sin[theta], ib_fake*sin_120[theta], ic_fake*sin_m120[theta], &Ialpha, &Ibeta);
-            //park(Ialpha, Ibeta, &Id, &Iq, theta);
+            clarke(Ia, Ib, Ic, &Ialpha, &Ibeta);
+            park(Ialpha, Ibeta, &Id, &Iq, (unsigned int)fTheta);
             /*
             PDC1 = (ia_fake*sin[theta]+10)*20;
             PDC2 = (ib_fake*sin_120[theta]+10)*20;
             PDC3 = (ic_fake*sin_m120[theta]+10)*20;
             */
             
-            update = 0;
-            //inverse_park(Vdref, Vqref, fTheta, &Valpha, &Vbeta);
-            //inverse_clarke(Valpha, Vbeta, &va, &vb, &vc);
-            //PDC1 = (unsigned int)((va+6)*150);
-            //PDC2 = (unsigned int)((vb+6)*150);
-            //PDC3 = (unsigned int)((vc+6)*150);
-          
+            Id_command = PI(Id_req, Id, Kp, Ki, &Id_integral);
+            Iq_command = PI(Iq_req, Iq, Kp, Ki, &Iq_integral);
             
+            Vd_command = .10*Id_command;
+            Vd_command = .10*Id_command;
             
+            inverse_park(Vd_command, Vq_command, (unsigned int)fTheta, &Valpha, &Vbeta);
+            inverse_clarke(Valpha, Vbeta, &Va, &Vb, &Vc);
+            PDC1 = (unsigned int)((Va+15)*15);
+            PDC2 = (unsigned int)((Vb+15)*15);
+            PDC3 = (unsigned int)((Vc+15)*15);
+            //PDC1 = (unsigned int)(fOmega/100);
+            //PDC2 = 200;
+            
+        }else{
+            EN = 0;
         }
         
     }

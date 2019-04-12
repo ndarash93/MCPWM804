@@ -160,6 +160,7 @@ int main(void) {
             //PDC1 = (unsigned int)(fOmega/100);
             //PDC2 = 200;
             
+            
         }else{
             EN = 0;
         }

@@ -72,15 +72,24 @@
 #include <string.h>
 
 
+
+#define IA bufferADC[]
+
+
+
 void inverse_park(int d, int q, int theta, float* alpha, float* beta);
 void inverse_clarke(float alpha, float beta, float* a, float* b, float* c);
 void park(float alpha, float beta, float* d, float* q, int theta);
 void clarke(float a, float b, float c, float* alpha, float* beta);
-
+float PI(float request, float actual, unsigned int Kp, unsigned int Ki, float* integral);
 
 int main(void) {       
     float Vdref, Vqref, Valpha, Vbeta, va, vb, vc, ia_fake, ib_fake, ic_fake, Ialpha, Ibeta, Iqref, Idref, Id, Iq;
     const int Lq, Ld, deltaT, kN;
+    float Id_err, Iq_err;
+    
+    
+    
     Vdref = 0;
     Vqref = 5;
     Iqref = 1;
@@ -115,31 +124,34 @@ int main(void) {
     T1Setup();
     T2Setup();
     T4Setup();
-    ia_fake = 1;
-    ib_fake = 1;
-    ic_fake = 1;
+    ia_fake = 10;
+    ib_fake = 10;
+    ic_fake = 10;
     while(1){
         
         if(update){
-            clarke(ia_fake*sin[theta], ib_fake*sin_120[theta], ic_fake*sin_m120[theta], &Ialpha, &Ibeta);
-            park(Ialpha, Ibeta, &Id, &Iq, theta);
-            
-            PDC1 = (Id+1)*200;
-            PDC2 = (Iq+1)*200;
-            PDC3 = (Ialpha+1)*200;
             
             
             
+            
+            
+            //clarke(ia_fake*sin[theta], ib_fake*sin_120[theta], ic_fake*sin_m120[theta], &Ialpha, &Ibeta);
+            //park(Ialpha, Ibeta, &Id, &Iq, theta);
             /*
-            PDC1 = 200;
-            update = 0;
-            inverse_park(Vdref, Vqref, fTheta, &Valpha, &Vbeta);
-            inverse_clarke(Valpha, Vbeta, &va, &vb, &vc);
-            PDC1 = (unsigned int)((va+6)*150);
-            PDC2 = (unsigned int)((vb+6)*150);
-            PDC3 = (unsigned int)((vc+6)*150);
-            //PDC1 = (unsigned int)((fOmega));
+            PDC1 = (ia_fake*sin[theta]+10)*20;
+            PDC2 = (ib_fake*sin_120[theta]+10)*20;
+            PDC3 = (ic_fake*sin_m120[theta]+10)*20;
             */
+            
+            update = 0;
+            //inverse_park(Vdref, Vqref, fTheta, &Valpha, &Vbeta);
+            //inverse_clarke(Valpha, Vbeta, &va, &vb, &vc);
+            //PDC1 = (unsigned int)((va+6)*150);
+            //PDC2 = (unsigned int)((vb+6)*150);
+            //PDC3 = (unsigned int)((vc+6)*150);
+          
+            
+            
         }
         
     }
@@ -168,3 +180,8 @@ void clarke(float a, float b, float c, float* alpha, float* beta){
     *beta = (0.5773*(b-c));
 }
 
+float PI(float request, float actual, unsigned int Kp, unsigned int Ki, float* integral){
+    float err = request - actual;
+    *integral += err;
+    return (Kp*err + Ki*(*integral));
+}

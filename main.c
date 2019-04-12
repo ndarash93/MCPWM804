@@ -73,7 +73,9 @@
 
 
 
-#define IA bufferADC[]
+#define IA bufferADC[0]
+#define IB bufferADC[1]
+#define IC bufferADC[2]
 
 
 

@@ -162,7 +162,7 @@ int main(void) {
             
             
         }else{
-            EN = 0;
+            EN = 1;
         }
         
     }

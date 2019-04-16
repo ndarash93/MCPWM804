@@ -74,8 +74,8 @@
 
 
 #define IC bufferADC[0]
-#define IB bufferADC[1]
-#define IA bufferADC[2]
+#define IB bufferADC[2]
+#define IA bufferADC[1]
 #define EN LATCbits.LATC4
 
 
@@ -85,14 +85,18 @@ void park(float alpha, float beta, float* d, float* q, int theta);
 void clarke(float a, float b, float c, float* alpha, float* beta);
 float PI(float request, float actual, unsigned int Kp, unsigned int Ki, float* integral);
 
+
+void OCSetup(void);
+void T3Setup(void);
+
 int main(void) {       
     float Vd_command, Vq_command, Valpha, Vbeta, Va, Vb, Vc, Ia, Ib, Ic, Ialpha, Ibeta, Iqref, Idref, Id, Iq;
     const int Lq, Ld, deltaT, kN;
     float Id_err = 0, Iq_err = 0, Id_req, Iq_req, Id_integral = 0, Iq_integral = 0, Id_command, Iq_command;
-    unsigned int Kp = 200, Ki = 100;
+    unsigned int Kp = 200, Ki = 10;
     
     Id_req = 0.0;
-    Iq_req = 3.0;
+    Iq_req = 4.0;
     
     
     
@@ -126,15 +130,17 @@ int main(void) {
     T2Setup();
     T4Setup();
     
+    T3Setup();
+    OCSetup();
     while(1){
         
         if(update && fOmega > 2000){
             EN = 1;
             update = 0;
             
-            Ia = current[IA];
-            Ib = current[IB];
-            Ic = current[IC];
+            Ia = current[IA>>3];
+            Ib = current[IB>>3];
+            Ic = current[IC>>3];
             
             
             
@@ -149,20 +155,33 @@ int main(void) {
             Id_command = PI(Id_req, Id, Kp, Ki, &Id_integral);
             Iq_command = PI(Iq_req, Iq, Kp, Ki, &Iq_integral);
             
-            Vd_command = .10*Id_command;
-            Vd_command = .10*Id_command;
+            Vd_command = 2.11*Id_command;
+            Vd_command = 2.11*Id_command;
+            
             
             inverse_park(Vd_command, Vq_command, (unsigned int)fTheta, &Valpha, &Vbeta);
             inverse_clarke(Valpha, Vbeta, &Va, &Vb, &Vc);
-            PDC1 = (unsigned int)((Va+15)*15);
-            PDC2 = (unsigned int)((Vb+15)*15);
-            PDC3 = (unsigned int)((Vc+15)*15);
+            
+            PDC1 = (unsigned int)(Vc+300);
+            PDC2 = (unsigned int)(Va+300);
+            PDC3 = (unsigned int)(Vb+300);
+            //PDC2 = (unsigned int)fTheta;
+            //PDC3 = (unsigned int)Valpha;
+            //PDC3 = (unsigned int)Vbeta;
+            
             //PDC1 = (unsigned int)(fOmega/100);
             //PDC2 = 200;
             
             
+            
+            
+            OC1RS = (unsigned int)(Vb+300);
         }else{
-            EN = 1;
+            //PDC1 = IA;
+            //PDC2 = IB;
+            //PDC3 = IC;
+            OC1RS = (unsigned int)(Vb+300);
+            EN = 0;
         }
         
     }
@@ -195,4 +214,20 @@ float PI(float request, float actual, unsigned int Kp, unsigned int Ki, float* i
     float err = request - actual;
     *integral += err;
     return (Kp*err + Ki*(*integral));
+}
+
+
+
+void OCSetup(void){
+    TRISBbits.TRISB5 = 0;
+    OC1CONbits.OCTSEL = 1;
+    OC1CONbits.OCM = 0b110;
+    
+    RPOR2bits.RP5R = 0b10010;
+}
+
+void T3Setup(void){
+    T3CONbits.TCKPS = 0b11;
+    T3CONbits.TON = 1;
+    PR3 = 1023;
 }

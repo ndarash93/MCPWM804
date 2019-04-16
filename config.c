@@ -54,7 +54,7 @@ void T2Setup(void){
 void T4Setup(void){
     IFS1bits.T4IF = 0;
     IEC1bits.T4IE = 1;
-    PR4 = 32000;
+    PR4 = 4000;
     T4CONbits.TCKPS = 0b00;
     T4CONbits.TON = 1;
 }

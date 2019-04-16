@@ -174,7 +174,7 @@ void __attribute__((interrupt, no_auto_psv)) _IC7Interrupt(void){
 
 void __attribute__ ((interrupt, no_auto_psv)) _T2Interrupt(void){
     IFS0bits.T2IF = 0;
-    send = 1;
+    //send = 1;
     //fSpeed = 0;
     fOmega = 0;
     //i_A = 0;

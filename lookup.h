@@ -1464,7 +1464,7 @@ const float sin_m120[360] = {
 };
 */
 
-/*
+
 const float current[1024] = {
     -50.0000, 
     -49.9355, 
@@ -2491,8 +2491,8 @@ const float current[1024] = {
     15.9355, 
     16.0000
 };
-*/
 
+/*
 const float current[128] = {
     -50.0,
 -49.4804,
@@ -2622,5 +2622,5 @@ const float current[128] = {
 14.95,
 15.4696
 };
-
+*/
 #endif

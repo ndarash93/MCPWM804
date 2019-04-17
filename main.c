@@ -83,7 +83,7 @@ void inverse_park(int d, int q, int theta, float* alpha, float* beta);
 void inverse_clarke(float alpha, float beta, float* a, float* b, float* c);
 void park(float alpha, float beta, float* d, float* q, int theta);
 void clarke(float a, float b, float c, float* alpha, float* beta);
-float PI(float request, float actual, unsigned int Kp, unsigned int Ki, float* integral);
+float PI(float request, float actual, float Kp, float Ki, float* integral);
 
 
 void OCSetup(void);
@@ -93,10 +93,10 @@ int main(void) {
     float Vd_command, Vq_command, Valpha, Vbeta, Va, Vb, Vc, Ia, Ib, Ic, Ialpha, Ibeta, Iqref, Idref, Id, Iq;
     const int Lq, Ld, deltaT, kN;
     float Id_err = 0, Iq_err = 0, Id_req, Iq_req, Id_integral = 0, Iq_integral = 0, Id_command, Iq_command;
-    unsigned int Kp = 200, Ki = 10;
+    float Kp = 10, Ki = 20;
     
     Id_req = 0.0;
-    Iq_req = -4.0;
+    Iq_req = 4.0;
     
     
     
@@ -132,15 +132,15 @@ int main(void) {
     
     T3Setup();
     OCSetup();
+    EN = 1;
     while(1){
         
-        if(update && fOmega > 3000){
-            EN = 0;
-            update = 0;
+        if(fOmega > 1000){
             
-            Ia = current[IA];
-            Ib = current[IB];
-            Ic = current[IC];
+            
+            Ia = current[IA>>1];
+            Ib = current[IB>>1];
+            Ic = current[IC>>1];
             
             
             
@@ -155,16 +155,16 @@ int main(void) {
             Id_command = PI(Id_req, Id, Kp, Ki, &Id_integral);
             Iq_command = PI(Iq_req, Iq, Kp, Ki, &Iq_integral);
             
-            Vd_command = 2.11*Id_command;
-            Vq_command = 2.11*Iq_command;
+            Vd_command = .1*Id_command;
+            Vq_command = .1*Iq_command;
             
             
             inverse_park(Vd_command, Vq_command, (unsigned int)fTheta, &Valpha, &Vbeta);
             inverse_clarke(Valpha, Vbeta, &Va, &Vb, &Vc);
             
-            PDC1 = (unsigned int)(Va+500);
-            PDC2 = (unsigned int)(Vb+500);
-            PDC3 = (unsigned int)(Vc+500);
+            PDC1 = (unsigned int)(Va+300);
+            PDC2 = (unsigned int)(Vb+300);
+            PDC3 = (unsigned int)(Vc+300);
             //PDC2 = (unsigned int)fTheta;
             //PDC3 = (unsigned int)Valpha;
             //PDC3 = (unsigned int)Vbeta;
@@ -175,13 +175,13 @@ int main(void) {
             
             
             
-            OC1RS = (unsigned int)(Va+300);
+            OC1RS = (unsigned int)(10*Ialpha+300);
         }else{
-            //PDC1 = IA;
-            //PDC2 = IB;
-            //PDC3 = IC;
-            OC1RS = (unsigned int)(Va+300);
-            EN = 0;
+            PDC1 = 0;
+            PDC2 = 0;
+            PDC3 = 0;
+            
+            
         }
         
     }
@@ -210,7 +210,7 @@ void clarke(float a, float b, float c, float* alpha, float* beta){
     *beta = (0.5773*(b-c));
 }
 
-float PI(float request, float actual, unsigned int Kp, unsigned int Ki, float* integral){
+float PI(float request, float actual, float Kp, float Ki, float* integral){
     float err = request - actual;
     *integral += err;
     return (Kp*err + Ki*(*integral));
@@ -227,7 +227,7 @@ void OCSetup(void){
 }
 
 void T3Setup(void){
-    T3CONbits.TCKPS = 0b11;
+    T3CONbits.TCKPS = 0b00;
     T3CONbits.TON = 1;
-    PR3 = 1023;
+    PR3 = 1000;
 }

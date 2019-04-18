@@ -93,17 +93,17 @@ int main(void) {
     float Vd_command, Vq_command, Valpha, Vbeta, Va, Vb, Vc, Ia, Ib, Ic, Ialpha, Ibeta, Iqref, Idref, Id, Iq;
     const int Lq, Ld, deltaT, kN;
     float Id_err = 0, Iq_err = 0, Id_req, Iq_req, Id_integral = 0, Iq_integral = 0, Id_command, Iq_command;
-    float Kp = 10, Ki = 20;
+    float Kp = 10, Ki = 100;
     
-    Id_req = 0.0;
+    Id_req = 0;
     Iq_req = 4.0;
     
-    
+    char str[40];
     
     oscSetup();
     
     pwmSetup();
-    //T5Setup();
+    T5Setup();
     
     TRISCbits.TRISC4 = 0;
     TRISCbits.TRISC0 = 1;
@@ -111,9 +111,9 @@ int main(void) {
     TRISCbits.TRISC2 = 1;
     LATCbits.LATC4 = 1;
     
-    //uartSetup();
+    uartSetup();
     
-    //UARTSend("Test");
+    UARTSend("Test");
     dmaSetup();
     adcSetup();
     
@@ -132,10 +132,14 @@ int main(void) {
     
     T3Setup();
     OCSetup();
+    EN = 0;
+    ms_delay(500);
     EN = 1;
     while(1){
+        //sprintf(str, "%1.4f,\n\r", fTheta);
         
-        if(fOmega > 1000){
+        
+        if(fOmega >= 1000){
             
             
             Ia = current[IA>>1];
@@ -146,36 +150,27 @@ int main(void) {
             
             clarke(Ia, Ib, Ic, &Ialpha, &Ibeta);
             park(Ialpha, Ibeta, &Id, &Iq, (unsigned int)fTheta);
-            /*
-            PDC1 = (ia_fake*sin[theta]+10)*20;
-            PDC2 = (ib_fake*sin_120[theta]+10)*20;
-            PDC3 = (ic_fake*sin_m120[theta]+10)*20;
-            */
+           
             
             Id_command = PI(Id_req, Id, Kp, Ki, &Id_integral);
             Iq_command = PI(Iq_req, Iq, Kp, Ki, &Iq_integral);
             
-            Vd_command = .1*Id_command;
-            Vq_command = .1*Iq_command;
+            Vd_command = Id_command;
+            Vq_command = Iq_command;
             
             
             inverse_park(Vd_command, Vq_command, (unsigned int)fTheta, &Valpha, &Vbeta);
             inverse_clarke(Valpha, Vbeta, &Va, &Vb, &Vc);
             
-            PDC1 = (unsigned int)(Va+300);
-            PDC2 = (unsigned int)(Vb+300);
-            PDC3 = (unsigned int)(Vc+300);
-            //PDC2 = (unsigned int)fTheta;
-            //PDC3 = (unsigned int)Valpha;
-            //PDC3 = (unsigned int)Vbeta;
-            
-            //PDC1 = (unsigned int)(fOmega/100);
-            //PDC2 = 200;
+            PDC1 = (unsigned int)(Va + 500);
+            PDC2 = (unsigned int)(Vb + 500);
+            PDC3 = (unsigned int)(Vc + 500);
+            //sprintf(str, "%4.4f\n\r", Va);
+            //UARTSend(str);
             
             
             
-            
-            OC1RS = (unsigned int)(10*Ialpha+300);
+            OC1RS = (unsigned int)((sin[(unsigned int)fTheta]*500) + 500);
         }else{
             PDC1 = 0;
             PDC2 = 0;
@@ -212,7 +207,7 @@ void clarke(float a, float b, float c, float* alpha, float* beta){
 
 float PI(float request, float actual, float Kp, float Ki, float* integral){
     float err = request - actual;
-    *integral += err;
+    *integral += err*.0000064;
     return (Kp*err + Ki*(*integral));
 }
 

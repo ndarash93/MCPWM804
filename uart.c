@@ -17,7 +17,7 @@ void uartSetup(void){
 // U1MODE Register settings
     
     
-    U1BRG = 86;  // 115200
+    U1BRG = 270;  // 115200
     TRISCbits.TRISC9 = 0;
     
     U1MODEbits.UARTEN = 1; //Enable UART1
@@ -29,7 +29,7 @@ void uartSetup(void){
     U1MODEbits.LPBACK = 0;
     U1MODEbits.ABAUD = 0;
     U1MODEbits.URXINV = 0;
-    U1MODEbits.BRGH = 1; //16x baud clock
+    U1MODEbits.BRGH = 0; //16x baud clock
     U1MODEbits.PDSEL = 0b00; //8bit data - no parity
     U1MODEbits.STSEL = 0;
     
@@ -41,7 +41,8 @@ void uartSetup(void){
     U1STAbits.ADDEN = 0; //Address detect bit
     U1STAbits.OERR = 0;  //Overrun Error Status Bit
     
-    
+    TRISCbits.TRISC9 = 0;
+    TRISCbits.TRISC8 = 1;
     RPOR12bits.RP25R = 0b00011;   
 }
 

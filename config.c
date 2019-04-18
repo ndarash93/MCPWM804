@@ -46,7 +46,7 @@ void us_delay(int n){
 void T2Setup(void){
     IFS0bits.T2IF = 0;
     IEC0bits.T2IE = 0;
-    PR2 = 65534;
+    PR2 = 10000;
     T2CONbits.TCKPS = 0b11;
     T2CONbits.TON = 1;
 }

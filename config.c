@@ -63,7 +63,7 @@ void T1Setup(void){
     IFS0bits.T1IF = 0;
     IEC0bits.T1IE = 1;
     T1CONbits.TCKPS = 0b11;
-    PR1 = 36;
+    PR1 = 72;
     T1CONbits.TON = 1;
 }
 

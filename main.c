@@ -93,10 +93,33 @@ int main(void) {
     float Vd_command, Vq_command, Valpha, Vbeta, Va, Vb, Vc, Ia, Ib, Ic, Ialpha, Ibeta, Iqref, Idref, Id, Iq;
     const int Lq, Ld, deltaT, kN;
     float Id_err = 0, Iq_err = 0, Id_req, Iq_req, Id_integral = 0, Iq_integral = 0, Id_command, Iq_command;
-    float Kp = 10, Ki = 100;
+    float Kp = 100, Ki = 1;
+    
+    float filterA, prevFilterA;
+    float bufferA[512];
+    
+    float filterB, prevFilterB;
+    float bufferB[512];
+    
+    float filterC, prevFilterC;
+    float bufferC[512];
+    unsigned int bufferIndex = 0;
+    
+    
+    
+    float integrator0, integrator1, integrator2;
+    float Ke, Kt;
+    float J, L, R;
+    float cTheta;
+    float di, dTheta, d2Theta;
+    float kLW = .1;
+    float kRW = 1;
+    
+    
+    
     
     Id_req = 0;
-    Iq_req = 4.0;
+    Iq_req = 7.0;
     
     char str[40];
     
@@ -139,45 +162,71 @@ int main(void) {
         //sprintf(str, "%1.4f,\n\r", fTheta);
         
         
-        if(fOmega >= 1000){
+        if(1){
             
             
-            Ia = current[IA>>1];
-            Ib = current[IB>>1];
-            Ic = current[IC>>1];
+            Ia = current[IA];
+            Ib = current[IB];
+            Ic = current[IC];
             
+            bufferA[bufferIndex&0x1FF] = Ia;
+            prevFilterA = filterA;
+            filterA += Ia;
+            bufferIndex++;
+            filterA -= bufferA[bufferIndex&0x1FF];
             
+            bufferB[bufferIndex&0x1FF] = Ib;
+            prevFilterB = filterB;
+            filterB += Ib;
+            bufferIndex++;
+            filterB -= bufferB[bufferIndex&0x1FF];
             
-            clarke(Ia, Ib, Ic, &Ialpha, &Ibeta);
-            park(Ialpha, Ibeta, &Id, &Iq, (unsigned int)fTheta);
+            bufferC[bufferIndex&0x1FF] = Ic;
+            prevFilterC = filterC;
+            filterC += Ic;
+            bufferIndex++;
+            filterC -= bufferC[bufferIndex&0x1FF];
+            
+            cTheta = asin[(unsigned int)((filterA/512)*kRW + kLW*((filterA-prevFilterA)*10000))];
+            
+            clarke(filterA/512, filterB/512, filterC/512, &Ialpha, &Ibeta);
+            park(Ialpha, Ibeta, &Id, &Iq, (unsigned int)(cTheta+90));
            
             
             Id_command = PI(Id_req, Id, Kp, Ki, &Id_integral);
             Iq_command = PI(Iq_req, Iq, Kp, Ki, &Iq_integral);
             
-            Vd_command = Id_command;
-            Vq_command = Iq_command;
+            Vd_command = 4*Id_command;
+            Vq_command = 4*Iq_command;
             
             
-            inverse_park(Vd_command, Vq_command, (unsigned int)fTheta, &Valpha, &Vbeta);
+            inverse_park(Vd_command, Vq_command, (unsigned int)(cTheta+90), &Valpha, &Vbeta);
             inverse_clarke(Valpha, Vbeta, &Va, &Vb, &Vc);
+           
+            /*
+            PDC1 = (unsigned int)(500*sin[theta] + 500);
+            PDC2 = (unsigned int)(500*sin_120[theta] + 500);
+            PDC3 = (unsigned int)(500*sin_m120[theta] + 500);            
+            */
             
-            PDC1 = (unsigned int)(Va + 500);
-            PDC2 = (unsigned int)(Vb + 500);
-            PDC3 = (unsigned int)(Vc + 500);
-            //sprintf(str, "%4.4f\n\r", Va);
-            //UARTSend(str);
+            PDC1 = (unsigned int)(500);
+            PDC1 = (unsigned int)(500);
+            PDC1 = (unsigned int)(500);
             
+            //PDC1 = 0;
+            //PDC2 = 0;
+            //PDC3 = 0;
             
-            
-            OC1RS = (unsigned int)((sin[(unsigned int)fTheta]*500) + 500);
+            //OC1RS = (unsigned int)((sin[(unsigned int)fTheta]*500) + 500);
+            OC1RS = (unsigned int)(cTheta*2) + 500;
         }else{
             PDC1 = 0;
             PDC2 = 0;
             PDC3 = 0;
-            
+            OC1RS = (unsigned int)(cTheta*2) + 500;
             
         }
+        //cTheta = asin[(unsigned int)(filterA*kRW + kLW*((filterA-prevFilterA)/.0001))];
         
     }
     return 0;

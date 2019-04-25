@@ -114,14 +114,14 @@ int main(void) {
     
     //float d, q, alpha, beta;
     while(1){
-        if(run < 9){
+        if(run<1){
             H1 = hall_A;
             L1 = !hall_A;
             H2 = hall_B;
             L2 = !hall_B;
             H3 = hall_C;
             L3 = !hall_C;
-            //okToSwitch = 0;
+            //okToSwitch = 
         }else{
             H1 = 0;
             L1 = 0;

@@ -57,7 +57,7 @@ void __attribute__((interrupt, no_auto_psv)) _IC1Interrupt(void){
     hall_A = !hall_A;
     if(hall_A && hall_B && !hall_C){
         //position++;
-        //fSpeed = 1.0472/(IC1BUF*0.0000064);
+        fSpeed = 1.0472/(IC1BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 1;
         P1OVDCONbits.POUT1L = 0;
@@ -73,7 +73,7 @@ void __attribute__((interrupt, no_auto_psv)) _IC1Interrupt(void){
         
     }else if(!hall_A && !hall_B && hall_C){
         //position++;
-        //fSpeed = 1.0472/(IC1BUF*0.0000064);
+        fSpeed = 1.0472/(IC1BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 0;
         P1OVDCONbits.POUT1L = 1;
@@ -97,7 +97,7 @@ void __attribute__((interrupt, no_auto_psv)) _IC2Interrupt(void){
        
     }else if(hall_A && !hall_B && !hall_C){
         //position++;
-        //fSpeed = 1.0472/(IC2BUF*0.0000064);
+        fSpeed = 1.0472/(IC2BUF*0.0000064);
         //fPos = 0;
         //fCalc = 0;
         /*
@@ -113,7 +113,7 @@ void __attribute__((interrupt, no_auto_psv)) _IC2Interrupt(void){
         
     }else if(!hall_A && hall_B && hall_C){
         //position++;
-        //fSpeed = 1.0472/(IC2BUF*0.0000064);
+        fSpeed = 1.0472/(IC2BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 0;
         P1OVDCONbits.POUT1L = 1;
@@ -135,7 +135,7 @@ void __attribute__((interrupt, no_auto_psv)) _IC7Interrupt(void){
         //fCalc = 0;
     }else if(hall_A && !hall_B && hall_C){
         //position++;
-        //fSpeed = 1.0472/(IC7BUF*0.0000064);
+        fSpeed = 1.0472/(IC7BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 1;
         P1OVDCONbits.POUT1L = 0;
@@ -149,7 +149,7 @@ void __attribute__((interrupt, no_auto_psv)) _IC7Interrupt(void){
         
     }else if(!hall_A && hall_B && !hall_C){
         //position++;
-        //fSpeed = 1.0472/(IC7BUF*0.0000064);
+        fSpeed = 1.0472/(IC7BUF*0.0000064);
         /*
         P1OVDCONbits.POUT1H = 0;
         P1OVDCONbits.POUT1L = 1;

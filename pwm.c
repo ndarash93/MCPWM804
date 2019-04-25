@@ -20,9 +20,9 @@ void pwmSetup(void){
     P1TMRbits.PTDIR = 0; // Timer counts up
     
     // PWMxCON1
-    PWM1CON1bits.PMOD1 = 0;
-    PWM1CON1bits.PMOD2 = 0;
-    PWM1CON1bits.PMOD3 = 0;
+    PWM1CON1bits.PMOD1 = 1;
+    PWM1CON1bits.PMOD2 = 1;
+    PWM1CON1bits.PMOD3 = 1;
     PWM1CON1bits.PEN1H = 1;
     PWM1CON1bits.PEN1L = 1;
     PWM1CON1bits.PEN2H = 1;

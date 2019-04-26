@@ -114,26 +114,21 @@ int main(void) {
     
     //float d, q, alpha, beta;
     while(1){
-        if(run<1){
-            H1 = hall_A;
-            L1 = !hall_A;
-            H2 = hall_B;
-            L2 = !hall_B;
-            H3 = hall_C;
-            L3 = !hall_C;
-            //okToSwitch = 
+        if(hall_A){
+            PDC1 = 800;
         }else{
-            H1 = 0;
-            L1 = 0;
-            H2 = 0;
-            L2 = 0;
-            H3 = 0;
-            L3 = 0;
-            if(run >= 10){
-                run = 0;
-            }
+            PDC1 = 0;
         }
-        
+        if(hall_B){
+            PDC2 = 800;
+        }else{
+            PDC2 = 0;
+        }
+        if(hall_C){
+            PDC3 = 800;
+        }else{
+            PDC3 = 0;
+        }
     }
     return 0;
 }
